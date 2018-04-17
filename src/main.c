@@ -230,8 +230,7 @@ int main(int argc, char *argv[]) {
 	sceIoMkdir("ux0:/rePatch/PCSG00141/data/vita/patches", 0777);
 	}
 	
-	printf("This will check for/update the PSO2 vita English patch to the newest version available.\n"
-		"If this program fails to patch/update for some reason, you can download the patch from http://arks-layer.com/.\n\n");
+	psvDebugScreenPrintf("This will check for/update the PSO2 vita English patch to the newest version available.\nIf this program fails to patch/update for some reason, you can download the patch from http://arks-layer.com/.\n\n");
 		
 	psvDebugScreenPrintf("\e[31m" "!!!Please make sure that you have the rePatch plugin installed and enabled.!!!\n\n" "\e[39;49m");
 	netInit();
@@ -308,6 +307,10 @@ int main(int argc, char *argv[]) {
 			if(strcmp(releaseinfo_old,"1/1/2091") != 0) 
 			{
 			psvDebugScreenPrintf("\e[31m" "Unable to locate the English patch file! Would you like to re-install it?\nPress X for yes, O for no.\n" "\e[39;49m");
+			}
+			else
+			{
+				psvDebugScreenPrintf("You don't appear to have ever installed the English patch before on this system (using PSO2v Tweaker).\nWould you like to install it?\nPress X for yes, O for no.\n");
 			}
 		}
 		else
