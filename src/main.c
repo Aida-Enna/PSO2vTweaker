@@ -18,6 +18,7 @@ conflicts, and that would be a very sad thing. - Aeolia Schenberg, 2091 A.D.
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <assert.h>
 #include <malloc.h>
 #include <string.h>
@@ -80,11 +81,22 @@ void download(const char *url, const char *dest) {
 	while ((read = sceHttpReadData(request, &data, sizeof(data))) > 0) {
 
 		// writing the count of read bytes from the data buffer to the file
-		//int write = sceIoWrite(fh, data, read);
+		/*int write = */sceIoWrite(fh, data, read);
 	}
 
 	// close file
 	sceIoClose(fh);
+}
+
+int WriteFile(char *file, void *buf, int size) {
+	SceUID fd = sceIoOpen(file, SCE_O_WRONLY | SCE_O_CREAT | SCE_O_TRUNC, 0777);
+	if (fd < 0)
+		return fd;
+
+	int written = sceIoWrite(fd, buf, size);
+
+	sceIoClose(fd);
+	return written;
 }
 
 int ReadFile(char *file, void *buf, int size) {
@@ -107,37 +119,80 @@ int getFileSize(const char *file) {
 	return fileSize;
 }
 
+bool FileExists(const char* file) {
+    struct stat buf;
+    return (stat(file, &buf) == 0);
+}
+
 int main(int argc, char *argv[]) {
 	//cmake . && make
 	psvDebugScreenInit();
 	
 	//http://patorjk.com/software/taag/#p=display&f=Basic&t=PSO2v%20Tweaker
-	psvDebugScreenPrintf("\e[34m" "d8888b. .d8888.  .d88b.  .d888b. db    db      d888888b db   d8b   db d88888b  .d8b.  db   dD d88888b d8888b. \n");
-	psvDebugScreenPrintf("\e[34m" "88  `8D 88'  YP .8P  Y8. VP  `8D 88    88      `~~88~~' 88   I8I   88 88'     d8' `8b 88 ,8P' 88'     88  `8D \n");
-	psvDebugScreenPrintf("\e[34m" "88oodD' `8bo.   88    88    odD' Y8    8P         88    88   I8I   88 88ooooo 88ooo88 88,8P   88ooooo 88oobY' \n");
-	psvDebugScreenPrintf("\e[34m" "88~~~     `Y8b. 88    88  .88'   `8b  d8'         88    Y8   I8I   88 88~~~~~ 88~~~88 88`8b   88~~~~~ 88`8b   \n");
-	psvDebugScreenPrintf("\e[34m" "88      db   8D `8b  d8' j88.     `8bd8'          88    `8b d8'8b d8' 88.     88   88 88 `88. 88.     88 `88. \n");
-	psvDebugScreenPrintf("\e[34m" "88      `8888Y'  `Y88P'  888888D    YP            YP     `8b8' `8d8'  Y88888P YP   YP YP   YD Y88888P 88   YD \n");
+	psvDebugScreenPrintf("\e[34m" "d8888b. .d8888.  .d88b.  " "\e[31m" ".d888b. " "\e[34m" "db    db      " "\e[33m" "d888888b db   d8b   db d88888b  .d8b.  db   dD d88888b d8888b. \n");
+	psvDebugScreenPrintf("\e[34m" "88  `8D 88'  YP .8P  Y8. " "\e[31m" "VP  `8D " "\e[34m" "88    88      " "\e[33m" "`~~88~~' 88   I8I   88 88'     d8' `8b 88 ,8P' 88'     88  `8D \n");
+	psvDebugScreenPrintf("\e[34m" "88oodD' `8bo.   88    88 " "\e[31m" "   odD' " "\e[34m" "Y8    8P      " "\e[33m" "   88    88   I8I   88 88ooooo 88ooo88 88,8P   88ooooo 88oobY' \n");
+	psvDebugScreenPrintf("\e[34m" "88~~~     `Y8b. 88    88 " "\e[31m" " .88'   " "\e[34m" "`8b  d8'      " "\e[33m" "   88    Y8   I8I   88 88~~~~~ 88~~~88 88`8b   88~~~~~ 88`8b   \n");
+	psvDebugScreenPrintf("\e[34m" "88      db   8D `8b  d8' " "\e[31m" "j88.    " "\e[34m" " `8bd8'       " "\e[33m" "   88    `8b d8'8b d8' 88.     88   88 88 `88. 88.     88 `88. \n");
+	psvDebugScreenPrintf("\e[34m" "88      `8888Y'  `Y88P'  " "\e[31m" "888888D " "\e[34m" "   YP         " "\e[33m" "   YP     `8b8' `8d8'  Y88888P YP   YP YP   YD Y88888P 88   YD \n");
 	psvDebugScreenPrintf("\e[39;49m" "\n\n");
 	
 	//psvDebugScreenFont.size_w += 1;
 	//psvDebugScreenFont.size_h += 1;
 	
 	/*TODO
-	Have it check to make sure repatch is enabled
-	Check to make sure the game is installed/updated
-	Read info.txt from website and display info (optional)
-	Make it create a blank release_old.txt in ux0:/data/PSO2vTweaker if it's not there
-	Download release.txt and compare it to saved one (release_old.txt)
+	[Done!] Check to make sure the game is installed/updated
+	[Done!] Make it create a blank release_old.txt in ux0:/data/PSO2vTweaker if it's not there
+	[Done!] Download release.txt and compare it to saved one (release_old.txt)
 	If they don't match (dates), then download release_url.txt and download the file in that to the repatch folder and overwrite the release_old.txt
 	*/
 	
 	struct stat st = {0};
 
+	if (stat("ux0:/app/PCSG00141", &st) == -1) {
+	psvDebugScreenPrintf("\e[31m" "Couldn't find PSO2 vita - Are you sure it's installed? (ux0:/app/PCSG00141)\n");
+	psvDebugScreenPrintf("\e[31m" "A critical error has occurred. Please press X to exit the program.");
+		while (1) {
+		SceCtrlData pad;
+		sceCtrlPeekBufferPositive(0, &pad, 1);
+
+		if (pad.buttons & SCE_CTRL_CROSS)
+		{
+		sceKernelExitProcess(0);
+		return 0;		
+		}
+		sceKernelDelayThread(10000);
+		}
+	}
+	if (stat("ux0:/patch/PCSG00141", &st) == -1) {
+	psvDebugScreenPrintf("\e[31m" "Couldn't find PSO2 vita update data - Are you sure it's updated?\nStart the game and select \"Online Login\" to force an update check. (ux0:/patch/PCSG00141)\n");
+	psvDebugScreenPrintf("\e[31m" "A critical error has occurred. Please press X to exit the program.");
+		while (1) {
+		SceCtrlData pad;
+		sceCtrlPeekBufferPositive(0, &pad, 1);
+
+		if (pad.buttons & SCE_CTRL_CROSS)
+		{
+		sceKernelExitProcess(0);
+		return 0;		
+		}
+		sceKernelDelayThread(10000);
+		}
+	}
+	
+	//If our app doesn't have a directory, make it.
 	if (stat("ux0:/data/PSO2vTweaker", &st) == -1) {
 	psvDebugScreenPrintf("Creating app directory...\n");
 	sceIoMkdir("ux0:/data/PSO2vTweaker", 0777);
 	}
+	
+	//Check for old patch info, write a new one if it's not there (first boot)
+	if (!FileExists("ux0:/data/PSO2vTweaker/release_old.txt")) {
+	psvDebugScreenPrintf("Couldn't find old patch info, writing...\n");	
+	WriteFile("ux0:/data/PSO2vTweaker/release_old.txt","1/1/2091",sizeof("1/1/2091"));
+	}
+	
+	//Make the rePatch directories if they don't exist.
 	if (stat("ux0:/rePatch", &st) == -1) {
 	sceIoMkdir("ux0:/rePatch", 0777);
 	}
@@ -153,38 +208,61 @@ int main(int argc, char *argv[]) {
 	if (stat("ux0:/rePatch/PCSG00141/data/vita/patches", &st) == -1) {
 	sceIoMkdir("ux0:/rePatch/PCSG00141/data/vita/patches", 0777);
 	}
-	else
-	{
-		psvDebugScreenPrintf("Clearing patches directory...\n");
-		sceIoRmdir("ux0:/rePatch/PCSG00141/data/vita/patches", 0777);
-		sceKernelDelayThread(10000);
-		sceIoMkdir("ux0:/rePatch/PCSG00141/data/vita/patches", 0777);
-	}
 	
-	printf("This will check for/update the PSO2 vita English Patch to the newest version available.\n"
-		"If this program fails to patch/update for some reason, you can download the patch from http://arks-layer.com/pso2v.php.\n\n");
+	printf("This will check for/update the PSO2 vita English patch to the newest version available.\n"
+		"If this program fails to patch/update for some reason, you can download the patch from http://arks-layer.com/.\n\n");
 		
 	netInit();
 	httpInit();
 
 	psvDebugScreenPrintf("Checking for a new version of the patch... ");
+	
+	//Download the latest release eg. "4/16/2018"
     download("http://arks-layer.com/vita/release.txt", "ux0:data/PSO2vTweaker/release.txt");
-    
     int size = getFileSize("ux0:data/PSO2vTweaker/release.txt");
     char *releaseinfo = malloc(1024);
     memset(releaseinfo, 0, 1024);
     releaseinfo[1024] = 0x00;
-	ReadFile("ux0:data/PSO2vTweaker/release.txt",releaseinfo,size + 1);
+	ReadFile("ux0:data/PSO2vTweaker/release.txt",releaseinfo,size);
 	
-	psvDebugScreenPrintf("\nDone!\nThe latest patch appears to have been created on ");
-	psvDebugScreenPrintf("%c", releaseinfo);
-	psvDebugScreenPrintf("\n");
+	size = getFileSize("ux0:data/PSO2vTweaker/release_old.txt");
+    char *releaseinfo_old = malloc(1024);
+    memset(releaseinfo_old, 0, 1024);
+    releaseinfo_old[1024] = 0x00;
+	ReadFile("ux0:data/PSO2vTweaker/release_old.txt",releaseinfo_old,size);
+	
+/* Save this for later when we do patch installation.
+	//Remove all patches before we patch, just in case.
+	psvDebugScreenPrintf("Clearing patches directory...\n");
+	sceIoRmdir("ux0:/rePatch/PCSG00141/data/vita/patches", 0777);
+	sceKernelDelayThread(10000);
+	sceIoMkdir("ux0:/rePatch/PCSG00141/data/vita/patches", 0777);
+*/
+	
+	psvDebugScreenPrintf("Done!\nThe latest patch appears to have been created on %s.\n",releaseinfo);
+	if(strcmp(releaseinfo_old,"1/1/2091") == 0) {
+	psvDebugScreenPrintf("You don't appear to have ever installed the English patch before on this system (using PSO2v Tweaker).\n");
+	}
+	else
+	{
+		if(strcmp(releaseinfo,releaseinfo_old) == 0) {
+		psvDebugScreenPrintf("You have the latest version of the English patch!");
+		}
+		else
+		{
+		psvDebugScreenPrintf("The patch you have installed appears to be from %s.\n",releaseinfo_old);
+		}	
+	}
+	
+	//psvDebugScreenPrintf(releaseinfo);
+	//psvDebugScreenPrintf(".\n");
 	
 	
 	httpTerm();
 	netTerm();
 
-	psvDebugScreenPrintf("All done! Press X to exit.\n");
+	psvDebugScreenPrintf("\e[31m" "Please make sure that you have the rePatch plugin installed and enabled.\n" "\e[39;49m");
+	psvDebugScreenPrintf("Press X to exit.");
 	while (1) {
 		SceCtrlData pad;
 		sceCtrlPeekBufferPositive(0, &pad, 1);
