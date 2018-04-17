@@ -168,14 +168,16 @@ int main(int argc, char *argv[]) {
 	httpInit();
 
 	psvDebugScreenPrintf("Checking for a new version of the patch... ");
-	download("http://arks-layer.com/vita/release.txt", "ux0:data/PSO2vTweaker/release.txt");
+    download("http://arks-layer.com/vita/release.txt", "ux0:data/PSO2vTweaker/release.txt");
+    
+    int size = getFileSize("ux0:data/PSO2vTweaker/release.txt");
+    char *releaseinfo = malloc(1024);
+    memset(releaseinfo, 0, 1024);
+    releaseinfo[1024] = 0x00;
+	ReadFile("ux0:data/PSO2vTweaker/release.txt",releaseinfo,size + 1);
 	
-	int size = getFileSize("ux0:data/PSO2vTweaker/release.txt");
-    char *releaseinfo = malloc(size);
-	ReadFile("ux0:data/PSO2vTweaker/release.txt",releaseinfo,size);
-	
-	psvDebugScreenPrintf("Done!\nThe latest patch appears to have been created on ");
-	psvDebugScreenPrintf(releaseinfo);
+	psvDebugScreenPrintf("\nDone!\nThe latest patch appears to have been created on ");
+	psvDebugScreenPrintf("%c", releaseinfo);
 	psvDebugScreenPrintf("\n");
 	
 	
