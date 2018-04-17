@@ -63,6 +63,7 @@ target_link_libraries(pso2v_tweaker
   SceNetCtl_stub
   SceHttp_stub
   SceCtrl_stub
+  SceShellSvc_stub
 )
 
 ## Create Vita files

@@ -13,6 +13,7 @@ conflicts, and that would be a very sad thing. - Aeolia Schenberg, 2091 A.D.
 #include <psp2/net/netctl.h>
 #include <psp2/net/http.h>
 #include <psp2/io/fcntl.h>
+#include <psp2/shellutil.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -124,6 +125,16 @@ bool FileExists(const char* file) {
     return (stat(file, &buf) == 0);
 }
 
+void lock_psbutton() {
+    sceShellUtilLock(SCE_SHELL_UTIL_LOCK_TYPE_PS_BTN |
+                     SCE_SHELL_UTIL_LOCK_TYPE_QUICK_MENU);
+}
+
+void unlock_psbutton() {
+    sceShellUtilUnlock(SCE_SHELL_UTIL_LOCK_TYPE_PS_BTN |
+                       SCE_SHELL_UTIL_LOCK_TYPE_QUICK_MENU);
+}
+
 int main(int argc, char *argv[]) {
 	//cmake . && make
 	psvDebugScreenInit();
@@ -148,8 +159,10 @@ int main(int argc, char *argv[]) {
 	*/
 	
 	struct stat st = {0};
+	bool install_needed = false;
 
-	if (stat("ux0:/app/PCSG00141", &st) == -1) {
+	if (stat("ux0:/app/PCSG00141", &st) == -1) 
+	{
 	psvDebugScreenPrintf("\e[31m" "Couldn't find PSO2 vita - Are you sure it's installed? (ux0:/app/PCSG00141)\n");
 	psvDebugScreenPrintf("\e[31m" "A critical error has occurred. Please press X to exit the program.");
 		while (1) {
@@ -164,7 +177,8 @@ int main(int argc, char *argv[]) {
 		sceKernelDelayThread(10000);
 		}
 	}
-	if (stat("ux0:/patch/PCSG00141", &st) == -1) {
+	if (stat("ux0:/patch/PCSG00141", &st) == -1) 
+	{
 	psvDebugScreenPrintf("\e[31m" "Couldn't find PSO2 vita update data - Are you sure it's updated?\nStart the game and select \"Online Login\" to force an update check. (ux0:/patch/PCSG00141)\n");
 	psvDebugScreenPrintf("\e[31m" "A critical error has occurred. Please press X to exit the program.");
 		while (1) {
@@ -181,41 +195,67 @@ int main(int argc, char *argv[]) {
 	}
 	
 	//If our app doesn't have a directory, make it.
-	if (stat("ux0:/data/PSO2vTweaker", &st) == -1) {
+	if (stat("ux0:/data/PSO2vTweaker", &st) == -1) 
+	{
 	psvDebugScreenPrintf("Creating app directory...\n");
 	sceIoMkdir("ux0:/data/PSO2vTweaker", 0777);
 	}
 	
 	//Check for old patch info, write a new one if it's not there (first boot)
-	if (!FileExists("ux0:/data/PSO2vTweaker/release_old.txt")) {
+	if (!FileExists("ux0:/data/PSO2vTweaker/release_old.txt")) 
+	{
 	psvDebugScreenPrintf("Couldn't find old patch info, writing...\n");	
 	WriteFile("ux0:/data/PSO2vTweaker/release_old.txt","1/1/2091",sizeof("1/1/2091"));
 	}
 	
 	//Make the rePatch directories if they don't exist.
-	if (stat("ux0:/rePatch", &st) == -1) {
+	if (stat("ux0:/rePatch", &st) == -1) 
+	{
 	sceIoMkdir("ux0:/rePatch", 0777);
 	}
-	if (stat("ux0:/rePatch/PCSG00141", &st) == -1) {
+	if (stat("ux0:/rePatch/PCSG00141", &st) == -1) 
+	{
 	sceIoMkdir("ux0:/rePatch/PCSG00141", 0777);
 	}
-	if (stat("ux0:/rePatch/PCSG00141/data", &st) == -1) {
+	if (stat("ux0:/rePatch/PCSG00141/data", &st) == -1) 
+	{
 	sceIoMkdir("ux0:/rePatch/PCSG00141/data", 0777);
 	}
-	if (stat("ux0:/rePatch/PCSG00141/data/vita", &st) == -1) {
+	if (stat("ux0:/rePatch/PCSG00141/data/vita", &st) == -1) 
+	{
 	sceIoMkdir("ux0:/rePatch/PCSG00141/data/vita", 0777);
 	}
-	if (stat("ux0:/rePatch/PCSG00141/data/vita/patches", &st) == -1) {
+	if (stat("ux0:/rePatch/PCSG00141/data/vita/patches", &st) == -1) 
+	{
 	sceIoMkdir("ux0:/rePatch/PCSG00141/data/vita/patches", 0777);
 	}
 	
 	printf("This will check for/update the PSO2 vita English patch to the newest version available.\n"
 		"If this program fails to patch/update for some reason, you can download the patch from http://arks-layer.com/.\n\n");
 		
+	psvDebugScreenPrintf("\e[31m" "!!!Please make sure that you have the rePatch plugin installed and enabled.!!!\n\n" "\e[39;49m");
 	netInit();
 	httpInit();
 
 	psvDebugScreenPrintf("Checking for a new version of the patch... ");
+	
+	download("http://arks-layer.com/vita/release_url.txt", "ux0:data/PSO2vTweaker/release_url.txt");
+	
+	int url_size = getFileSize("ux0:data/PSO2vTweaker/release_url.txt");
+	char *releaseinfo_url = malloc(1024);
+	memset(releaseinfo_url, 0, 1024);
+	releaseinfo_url[1024] = 0x00;
+	ReadFile("ux0:data/PSO2vTweaker/release_url.txt",releaseinfo_url,url_size);
+	//psvDebugScreenPrintf("Download URL: %s.\n",releaseinfo_url);
+	
+	int SIZE_FILENAME = getFileSize(releaseinfo_url);
+	char *filename = (char*)calloc(1, sizeof(SIZE_FILENAME));
+	filename = (strrchr(releaseinfo_url, '/'))+1;
+	
+	char str_output[99]={0};
+ 
+	strcpy(str_output, "ux0:/rePatch/PCSG00141/data/vita/patches/");
+	strcat(str_output, filename);
 	
 	//Download the latest release eg. "4/16/2018"
     download("http://arks-layer.com/vita/release.txt", "ux0:data/PSO2vTweaker/release.txt");
@@ -231,37 +271,116 @@ int main(int argc, char *argv[]) {
     releaseinfo_old[1024] = 0x00;
 	ReadFile("ux0:data/PSO2vTweaker/release_old.txt",releaseinfo_old,size);
 	
-/* Save this for later when we do patch installation.
-	//Remove all patches before we patch, just in case.
-	psvDebugScreenPrintf("Clearing patches directory...\n");
-	sceIoRmdir("ux0:/rePatch/PCSG00141/data/vita/patches", 0777);
-	sceKernelDelayThread(10000);
-	sceIoMkdir("ux0:/rePatch/PCSG00141/data/vita/patches", 0777);
-*/
-	
 	psvDebugScreenPrintf("Done!\nThe latest patch appears to have been created on %s.\n",releaseinfo);
-	if(strcmp(releaseinfo_old,"1/1/2091") == 0) {
+	
+	if (!FileExists(str_output)) 
+	{
+		install_needed = true;
+	}
+	
+	if(install_needed == false)
+	{
+	if(strcmp(releaseinfo_old,"1/1/2091") == 0) 
+	{
 	psvDebugScreenPrintf("You don't appear to have ever installed the English patch before on this system (using PSO2v Tweaker).\n");
+	install_needed = true;
 	}
 	else
 	{
-		if(strcmp(releaseinfo,releaseinfo_old) == 0) {
-		psvDebugScreenPrintf("You have the latest version of the English patch!");
+		if(strcmp(releaseinfo,releaseinfo_old) == 0) 
+		{
+		psvDebugScreenPrintf("You have the latest version of the English patch!\n");
 		}
 		else
 		{
-		psvDebugScreenPrintf("The patch you have installed appears to be from %s.\n",releaseinfo_old);
+		//psvDebugScreenPrintf("The patch you have installed appears to be from ");
+		//psvDebugScreenPrintf(releaseinfo_old);
+		//psvDebugScreenPrintf(".\n");
+		install_needed = true;
 		}	
 	}
+	}
 	
-	//psvDebugScreenPrintf(releaseinfo);
-	//psvDebugScreenPrintf(".\n");
-	
+	if(install_needed == true) 
+	{
+		if (!FileExists(str_output)) 
+		{
+			if(strcmp(releaseinfo_old,"1/1/2091") != 0) 
+			{
+			psvDebugScreenPrintf("\e[31m" "Unable to locate the English patch file! Would you like to re-install it?\nPress X for yes, O for no.\n" "\e[39;49m");
+			}
+		}
+		else
+		{
+			psvDebugScreenPrintf("Would you like to install/update the English patch? Press X for yes, O for no.\n");
+		}
+		while (1) {
+		SceCtrlData pad;
+		sceCtrlPeekBufferPositive(0, &pad, 1);
+
+		if (pad.buttons & SCE_CTRL_CROSS)
+		{
+		lock_psbutton();
+		psvDebugScreenPrintf("Downloading patch, please wait...\n");
+		
+		/*//Download the latest release eg. "4/16/2018"
+		size = getFileSize("ux0:data/PSO2vTweaker/release_url.txt");
+		char *releaseinfo_url = malloc(1024);
+		memset(releaseinfo_url, 0, 1024);
+		releaseinfo_url[1024] = 0x00;
+		ReadFile("ux0:data/PSO2vTweaker/release_url.txt",releaseinfo_url,size);
+		//psvDebugScreenPrintf("Download URL: %s.\n",releaseinfo_url);*/
+		
+		//Remove all patches before we patch, just in case.
+		//psvDebugScreenPrintf("Clearing patches directory...\n");
+		sceIoRmdir("ux0:/rePatch/PCSG00141/data/vita/patches", 0777);
+		sceKernelDelayThread(10000);
+		sceIoMkdir("ux0:/rePatch/PCSG00141/data/vita/patches", 0777);
+		
+		/*int SIZE_FILENAME = getFileSize(releaseinfo_url);
+		char *filename = (char*)calloc(1, sizeof(SIZE_FILENAME));
+		filename = (strrchr(releaseinfo_url, '/'))+1;
+		//psvDebugScreenPrintf(" found filename: %s \n", filename);*/
+		
+		download(releaseinfo_url,str_output);
+		
+		sceKernelDelayThread(10000);
+		
+		SceUID fdsrc = sceIoOpen("ux0:data/PSO2vTweaker/release.txt", SCE_O_RDONLY, 0);
+
+		int fdsize = sceIoLseek(fdsrc, 0, SEEK_END);
+		sceIoLseek(fdsrc, 0, SEEK_SET);
+		void *buf = malloc(fdsize);
+		sceIoRead(fdsrc, buf, fdsize);
+		sceIoClose(fdsrc);
+
+		SceUID fddst = sceIoOpen("ux0:data/PSO2vTweaker/release_old.txt", SCE_O_WRONLY | SCE_O_CREAT, 0777);
+		
+		sceIoWrite(fddst, buf, fdsize);
+		sceIoClose(fddst);
+		
+		//download("http://arks-layer.com/vita/release.txt", "ux0:data/PSO2vTweaker/release_old.txt");
+		psvDebugScreenPrintf("\e[32m" "Patch downloaded to ux0:/rePatch/PCSG00141/data/vita/patches/. Installation complete!\n" "\e[39;49m");
+		sceKernelDelayThread(50000);
+		break;
+		}
+		if (pad.buttons & SCE_CTRL_CIRCLE)
+		{
+		psvDebugScreenPrintf("Installation aborted by user.\n");	
+		break;
+		}
+		sceKernelDelayThread(10000);
+		}
+	}
 	
 	httpTerm();
 	netTerm();
-
-	psvDebugScreenPrintf("\e[31m" "Please make sure that you have the rePatch plugin installed and enabled.\n" "\e[39;49m");
+	unlock_psbutton();
+	
+	sceKernelDelayThread(20000);
+	free(releaseinfo_url);
+	free(releaseinfo);
+	free(releaseinfo_old);
 	psvDebugScreenPrintf("Press X to exit.");
 	while (1) {
 		SceCtrlData pad;
