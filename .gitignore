@@ -1,0 +1,14 @@
+CMakeFiles
+CMakeCache.txt
+Makefile
+*.cmake
+*.sfo
+*.vpk
+*.velf
+*.bat
+*.exe
+*.dll
+eboot.bin
+pso2v_tweaker
+pso2v_tweaker.self
+pso2v_tweaker.velf
