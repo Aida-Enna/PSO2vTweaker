@@ -9,13 +9,10 @@ conflicts, and that would be a very sad thing. - Aeolia Schenberg, 2091 A.D.
 #include <psp2/kernel/processmgr.h>
 #include <psp2/display.h>
 #include <psp2/ctrl.h>
-
 #include <psp2/net/net.h>
 #include <psp2/net/netctl.h>
 #include <psp2/net/http.h>
-
 #include <psp2/io/fcntl.h>
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -29,34 +26,28 @@ conflicts, and that would be a very sad thing. - Aeolia Schenberg, 2091 A.D.
 
 void netInit() {
 	sceSysmoduleLoadModule(SCE_SYSMODULE_NET);
-	
 	SceNetInitParam netInitParam;
 	int size = 1*1024*1024;
 	netInitParam.memory = malloc(size);
 	netInitParam.size = size;
 	netInitParam.flags = 0;
 	sceNetInit(&netInitParam);
-
 	sceNetCtlInit();
 }
 
 void netTerm() {
 	sceNetCtlTerm();
-
 	sceNetTerm();
-
 	sceSysmoduleUnloadModule(SCE_SYSMODULE_NET);
 }
 
 void httpInit() {
 	sceSysmoduleLoadModule(SCE_SYSMODULE_HTTP);
-
 	sceHttpInit(1*1024*1024);
 }
 
 void httpTerm() {
 	sceHttpTerm();
-
 	sceSysmoduleUnloadModule(SCE_SYSMODULE_HTTP);
 }
 
