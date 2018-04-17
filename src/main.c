@@ -17,6 +17,8 @@ conflicts, and that would be a very sad thing. - Aeolia Schenberg, 2091 A.D.
 #include <sys/stat.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
 #include <malloc.h>
 #include <string.h>
 
@@ -85,18 +87,42 @@ void download(const char *url, const char *dest) {
 	sceIoClose(fh);
 }
 
+int ReadFile(char *file, void *buf, int size) {
+	SceUID fd = sceIoOpen(file,SCE_O_RDONLY, 0777);
+	if (fd < 0)
+		return fd;
+
+	int read = sceIoRead(fd, buf, size);
+
+	sceIoClose(fd);
+	return read;
+}
+
+int getFileSize(const char *file) {
+	SceUID fd = sceIoOpen(file, SCE_O_RDONLY, 0);
+	if (fd < 0)
+		return fd;
+	int fileSize = sceIoLseek(fd, 0, SCE_SEEK_END);
+	sceIoClose(fd);
+	return fileSize;
+}
+
 int main(int argc, char *argv[]) {
 	//cmake . && make
 	psvDebugScreenInit();
 	
 	//http://patorjk.com/software/taag/#p=display&f=Basic&t=PSO2v%20Tweaker
-	psvDebugScreenPrintf("d8888b. .d8888.  .d88b.  .d888b. db    db      d888888b db   d8b   db d88888b  .d8b.  db   dD d88888b d8888b. \n");
-	psvDebugScreenPrintf("88  `8D 88'  YP .8P  Y8. VP  `8D 88    88      `~~88~~' 88   I8I   88 88'     d8' `8b 88 ,8P' 88'     88  `8D \n");
-	psvDebugScreenPrintf("88oodD' `8bo.   88    88    odD' Y8    8P         88    88   I8I   88 88ooooo 88ooo88 88,8P   88ooooo 88oobY' \n");
-	psvDebugScreenPrintf("88~~~     `Y8b. 88    88  .88'   `8b  d8'         88    Y8   I8I   88 88~~~~~ 88~~~88 88`8b   88~~~~~ 88`8b   \n");
-	psvDebugScreenPrintf("88      db   8D `8b  d8' j88.     `8bd8'          88    `8b d8'8b d8' 88.     88   88 88 `88. 88.     88 `88. \n");
-	psvDebugScreenPrintf("88      `8888Y'  `Y88P'  888888D    YP            YP     `8b8' `8d8'  Y88888P YP   YP YP   YD Y88888P 88   YD \n");
-
+	psvDebugScreenPrintf("\e[34m" "d8888b. .d8888.  .d88b.  .d888b. db    db      d888888b db   d8b   db d88888b  .d8b.  db   dD d88888b d8888b. \n");
+	psvDebugScreenPrintf("\e[34m" "88  `8D 88'  YP .8P  Y8. VP  `8D 88    88      `~~88~~' 88   I8I   88 88'     d8' `8b 88 ,8P' 88'     88  `8D \n");
+	psvDebugScreenPrintf("\e[34m" "88oodD' `8bo.   88    88    odD' Y8    8P         88    88   I8I   88 88ooooo 88ooo88 88,8P   88ooooo 88oobY' \n");
+	psvDebugScreenPrintf("\e[34m" "88~~~     `Y8b. 88    88  .88'   `8b  d8'         88    Y8   I8I   88 88~~~~~ 88~~~88 88`8b   88~~~~~ 88`8b   \n");
+	psvDebugScreenPrintf("\e[34m" "88      db   8D `8b  d8' j88.     `8bd8'          88    `8b d8'8b d8' 88.     88   88 88 `88. 88.     88 `88. \n");
+	psvDebugScreenPrintf("\e[34m" "88      `8888Y'  `Y88P'  888888D    YP            YP     `8b8' `8d8'  Y88888P YP   YP YP   YD Y88888P 88   YD \n");
+	psvDebugScreenPrintf("\e[39;49m" "\n\n");
+	
+	//psvDebugScreenFont.size_w += 1;
+	//psvDebugScreenFont.size_h += 1;
+	
 	/*TODO
 	Have it check to make sure repatch is enabled
 	Check to make sure the game is installed/updated
@@ -112,27 +138,51 @@ int main(int argc, char *argv[]) {
 	psvDebugScreenPrintf("Creating app directory...\n");
 	sceIoMkdir("ux0:/data/PSO2vTweaker", 0777);
 	}
+	if (stat("ux0:/rePatch", &st) == -1) {
+	sceIoMkdir("ux0:/rePatch", 0777);
+	}
+	if (stat("ux0:/rePatch/PCSG00141", &st) == -1) {
+	sceIoMkdir("ux0:/rePatch/PCSG00141", 0777);
+	}
+	if (stat("ux0:/rePatch/PCSG00141/data", &st) == -1) {
+	sceIoMkdir("ux0:/rePatch/PCSG00141/data", 0777);
+	}
+	if (stat("ux0:/rePatch/PCSG00141/data/vita", &st) == -1) {
+	sceIoMkdir("ux0:/rePatch/PCSG00141/data/vita", 0777);
+	}
 	if (stat("ux0:/rePatch/PCSG00141/data/vita/patches", &st) == -1) {
-	psvDebugScreenPrintf("Creating rePatch directory...\n");
 	sceIoMkdir("ux0:/rePatch/PCSG00141/data/vita/patches", 0777);
-	}	
+	}
+	else
+	{
+		psvDebugScreenPrintf("Clearing patches directory...\n");
+		sceIoRmdir("ux0:/rePatch/PCSG00141/data/vita/patches", 0777);
+		sceKernelDelayThread(10000);
+		sceIoMkdir("ux0:/rePatch/PCSG00141/data/vita/patches", 0777);
+	}
 	
-	printf("This will check for and download (if needed) the newest version\n"
-		"of the PSO2 vita English Patch from the Arks-Layer website.\n"
-		"If this program fails to patch/update for some reason, you can\n"
-		"manually download the patch from http://arks-layer.com/pso2v.php.\n");
+	printf("This will check for/update the PSO2 vita English Patch to the newest version available.\n"
+		"If this program fails to patch/update for some reason, you can download the patch from http://arks-layer.com/pso2v.php.\n\n");
 		
 	netInit();
 	httpInit();
 
-	psvDebugScreenPrintf("Checking for new version of the patch... ");
+	psvDebugScreenPrintf("Checking for a new version of the patch... ");
 	download("http://arks-layer.com/vita/release.txt", "ux0:data/PSO2vTweaker/release.txt");
 	
-	psvDebugScreenPrintf("Done!\n");
+	int size = getFileSize("ux0:data/PSO2vTweaker/release.txt");
+    char *releaseinfo = malloc(size);
+	ReadFile("ux0:data/PSO2vTweaker/release.txt",releaseinfo,size);
+	
+	psvDebugScreenPrintf("Done!\nThe latest patch appears to have been created on ");
+	psvDebugScreenPrintf(releaseinfo);
+	psvDebugScreenPrintf("\n");
+	
 	
 	httpTerm();
 	netTerm();
 
+	psvDebugScreenPrintf("All done! Press X to exit.\n");
 	while (1) {
 		SceCtrlData pad;
 		sceCtrlPeekBufferPositive(0, &pad, 1);

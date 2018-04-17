@@ -63,11 +63,12 @@ target_link_libraries(pso2v_tweaker
   SceNetCtl_stub
   SceHttp_stub
   SceCtrl_stub
-  SceShellSvc_stub
 )
 
 ## Create Vita files
-vita_create_self(pso2v_tweaker.self pso2v_tweaker)
+vita_create_self(pso2v_tweaker.self pso2v_tweaker
+	UNSAFE
+)
 # The FILE directive lets you add additional files to the VPK, the syntax is 
 # FILE src_path dst_path_in_vpk. In this case, we add the LiveArea paths.
 vita_create_vpk(pso2v_tweaker.vpk ${VITA_TITLEID} pso2v_tweaker.self
