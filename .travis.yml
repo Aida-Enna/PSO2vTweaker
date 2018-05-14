@@ -22,16 +22,13 @@ addons:
 
 before_install:
   - git clone https://github.com/vitasdk/vdpm $VDPMPATH
-  - cd $VDPMPATH && pwd
-  - bash -x ./bootstrap-vitasdk.sh || true
+  - bash -x $VDPMPATH/bootstrap-vitasdk.sh || true
 
 install:
   - export PATH="$VITASDK:$PATH"
-  - cd $VDPMPATH && pwd
-  - ./install-all.sh
+  - $VDPMPATH/install-all.sh
 
 script:
-  - set
   - export PATH="$VITASDK:$PATH"
   - mkdir build && cd build
   - cmake ..
