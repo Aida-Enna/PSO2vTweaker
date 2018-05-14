@@ -191,7 +191,7 @@ int downloadpatch(const char *src, const char *dst) {
 
 			if ((value * 100 / (uint32_t)size) < 77)
 			{
-				printf("\rDownloading patch, please wait.....%d%%    ", (value * 100) / (uint32_t)size);
+				printf("\rDownloading patch, please wait.....%d%%    ", (int)((value * 100) / (uint32_t)size));
 			}
 			else
 			{
