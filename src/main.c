@@ -271,7 +271,7 @@ int main(int argc, char *argv[]) {
 	char *vpk_internal_ver = malloc(1024);
 	memset(vpk_internal_ver, 0, 1024);
 	vpk_internal_ver[1024] = 0x00;
-	vpk_internal_ver = "1.01a";
+	vpk_internal_ver = "1.02";
 	
 	//http://patorjk.com/software/taag/#p=display&f=Basic&t=PSO2v%20Tweaker
 	psvDebugScreenPrintf("\e[94m" "d8888b. .d8888.  .d88b.  " "\e[91m" ".d888b. " "\e[94m" "db    db      " "\e[93m" "d888888b db   d8b   db d88888b  .d8b.  db   dD d88888b d8888b. \n");
