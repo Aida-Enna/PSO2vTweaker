@@ -306,9 +306,9 @@ int main(int argc, char *argv[]) {
 	 * printf("\e[91m"     "A Red text ");            // 3X = set the foreground color to X
 	 * printf("\e[30;42m"  "Black text on Green BG ");// 4X = set the background color to X 
 	 * printf("\e[39;49m"  "default\n");              // 39/49 = reset FG/BG color 
-	 * printf("\e[97m"     "White+ text ");           /* 9X = set bright foreground color (keep green BG)
-	 * printf("\e[91;106m" "Red+ text on Cyan+ BG "); /* 10X= set bright background color
-	 * printf("\e[m"       "default\n");              /* no param = reset FG/BG
+	 * printf("\e[97m"     "White+ text ");           // 9X = set bright foreground color (keep green BG)
+	 * printf("\e[91;106m" "Red+ text on Cyan+ BG "); // 10X= set bright background color
+	 * printf("\e[m"       "default\n");              // no param = reset FG/BG
 	 */
 	
 	
