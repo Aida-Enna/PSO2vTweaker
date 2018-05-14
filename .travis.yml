@@ -10,13 +10,13 @@ cache:
 env:
   global:
     - VITASDK=$HOME/local/vitasdk
-    - VDPMPATH=$HOME/local/bdpm
+    - VDPMPATH=$HOME/local/vdpm
 
 
 before_install:
   - mkdir -v -p $VITASDK
   - git clone https://github.com/vitasdk/vdpm $VDPMPATH
-  - cd $VDPMSDK && pwd
+  - cd $VDPMPATH && pwd
   - ./bootstrap-vitasdk.sh
 
 install:
