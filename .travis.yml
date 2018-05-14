@@ -32,3 +32,5 @@ script:
   - export PATH="$VITASDK:$PATH"
   - mkdir build && cd build
   - cmake ..
+  - make
+  - ls -halR
