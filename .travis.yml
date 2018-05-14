@@ -3,12 +3,24 @@ dist: trusty
 sudo: required
 group: stable
 language: c
-services:
-  - docker
+cache:
+  directories:
+   - $HOME/local/vitasdk
+
+env:
+  - VITASDK=$HOME/local/vitasdk
+  - VDPMPATH=$HOME/local/bdpm
+
 
 before_install:
-  - docker pull miladiir/vitasdk
-  - docker run miladiir/vitasdk /bin/sh -l -c "VITASDK=/usr/local/vitasdk PATH=$VITASDK/bin:$PATH /usr/local/vitasdk/bin/vitasdk-update"
+  - mkdir -p $VITASDK
+  - git clone https://github.com/vitasdk/vdpm $VDPMPATH
 
 install:
-  -  docker run miladiir/vitasdk /bin/sh -l -c ""VITASDK=/usr/local/vitasdk PATH=$VITASDK/bin:$PATH cmake"
+  - export PATH="$VITASDK:$PATH"
+  - cd $VDPMPATH
+  - ./install-all.sh
+
+script:
+  - export PATH="$VITASDK:$PATH"
+  - cmake
