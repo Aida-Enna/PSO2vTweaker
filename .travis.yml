@@ -31,5 +31,7 @@ install:
   - ./install-all.sh
 
 script:
+  - set
   - export PATH="$VITASDK:$PATH"
-  - cmake
+  - mkdir build && cd build
+  - cmake ..
