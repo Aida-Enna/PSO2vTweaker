@@ -89,43 +89,6 @@ void download(const char *url, const char *dest) {
 	sceIoClose(fh);
 }
 
-void downloadpatch(const char *url, const char *dest) {
-
-	// Create template with user agent "PSO2v Tweaker"
-	int tpl = sceHttpCreateTemplate("PSO2v Tweaker", 1, 1);
-	//psvDebugScreenPrintf("0x%08X sceHttpCreateTemplate\n", tpl);
-
-	// set url on the template
-	int conn = sceHttpCreateConnectionWithURL(tpl, url, 0);
-
-	// create the request with the correct method
-	int request = sceHttpCreateRequestWithURL(conn, SCE_HTTP_METHOD_GET, url, 0);
-
-	// send the actual request. Second parameter would be POST data, third would be length of it.
-	sceHttpSendRequest(request, NULL, 0);
-	//int handle = sceHttpSendRequest(request, NULL, 0);
-
-	// open destination file
-	int fh = sceIoOpen(dest, SCE_O_WRONLY | SCE_O_CREAT, 0777);
-
-	// create buffer and counter for read bytes.
-	unsigned char data[16*1024];
-	int read = 0;
-	int count = 0;
-
-	// read data until finished
-	while ((read = sceHttpReadData(request, &data, sizeof(data))) > 0) {
-
-		// writing the count of read bytes from the data buffer to the file
-		/*int write =*/ sceIoWrite(fh, data, read);
-	}
-	
-	printf(" completed!\n");
-
-	// close file
-	sceIoClose(fh);
-}
-
 int WriteFile(char *file, void *buf, int size) {
 	SceUID fd = sceIoOpen(file, SCE_O_WRONLY | SCE_O_CREAT | SCE_O_TRUNC, 0777);
 	if (fd < 0)
@@ -442,7 +405,7 @@ int main(int argc, char *argv[]) {
 		filename = (strrchr(releaseinfo_url, '/'))+1;
 		//psvDebugScreenPrintf(" found filename: %s \n", filename);*/
 		
-		downloadpatch(releaseinfo_url,str_output);
+		download(releaseinfo_url,str_output);
 		
 		sceKernelDelayThread(10000);
 		
