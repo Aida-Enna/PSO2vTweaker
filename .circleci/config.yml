@@ -26,16 +26,16 @@ jobs:
       - checkout
       - run:
           name: make build folder
-          command: mkdir -v -p build && cd build
+          command: mkdir -v -p build
       - run:
           name: Build Makefile
-          command: cmake ..
+          command: cd buid && cmake ..
       - run:
           name: Build VPK
-          command: make
+          command: make -C build
       - run:
           name: List build
-          command: ls -halR
+          command: ls -halR build
       - store_artifacts:
           path: $CIRCLE_WORKING_DIRECTORY/build/*.vpk
           destination: bin
