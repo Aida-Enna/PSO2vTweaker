@@ -5,18 +5,18 @@ group: stable
 language: c
 cache:
   directories:
-   - $HOME/local/vitasdk
+   - $HOME/local/vita/
 
 env:
   global:
-    - VITASDK=$HOME/local/vitasdk
+    - VITASDK=$HOME/local/vita/sdk
     - VDPMPATH=$HOME/local/vdpm
 
 
 before_install:
   - git clone https://github.com/vitasdk/vdpm $VDPMPATH
   - cd $VDPMPATH && pwd
-  - bash -x ./bootstrap-vitasdk.sh
+  - bash -x ./bootstrap-vitasdk.sh || true
 
 install:
   - export PATH="$VITASDK:$PATH"
