@@ -8,8 +8,9 @@ cache:
    - $HOME/local/vitasdk
 
 env:
-  - VITASDK=$HOME/local/vitasdk
-  - VDPMPATH=$HOME/local/bdpm
+  global:
+    - VITASDK=$HOME/local/vitasdk
+    - VDPMPATH=$HOME/local/bdpm
 
 
 before_install:
