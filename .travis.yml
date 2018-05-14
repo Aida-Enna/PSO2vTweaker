@@ -8,7 +8,7 @@ services:
 
 before_install:
   - docker pull miladiir/vitasdk
-  - docker run miladiir/vitasdk /bin/sh -l -c "VITASDK=/usr/local/vitasdk PATH=$VITASDK/bin:$PATH vitasdk-update"
+  - docker run miladiir/vitasdk /bin/sh -l -c "VITASDK=/usr/local/vitasdk PATH=$VITASDK/bin:$PATH /usr/local/vitasdk/bin/vitasdk-update"
 
 install:
   -  docker run miladiir/vitasdk /bin/sh -l -c ""VITASDK=/usr/local/vitasdk PATH=$VITASDK/bin:$PATH cmake"
