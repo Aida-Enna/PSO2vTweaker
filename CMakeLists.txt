@@ -27,7 +27,7 @@ set(VITA_APP_NAME "PSO2v Tweaker")
 # unique string of developer and Y = a unique number for this app
 set(VITA_TITLEID  "AIDA00001")
 # Optional version string to show in LiveArea's more info screen
-set(VITA_VERSION  "00.01")
+set(VITA_VERSION  "00.02")
 
 ## Flags and includes for building
 # Note that we make sure not to overwrite previous flags
@@ -64,6 +64,7 @@ target_link_libraries(pso2v_tweaker
   SceHttp_stub
   SceCtrl_stub
   SceShellSvc_stub
+  SceAppMgr_stub
 )
 
 ## Create Vita files
