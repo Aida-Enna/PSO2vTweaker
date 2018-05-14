@@ -7,7 +7,7 @@ jobs:
         environment:
           VITASDK: /usr/local/vitasdk
           VDPMPATH: /usr/local/vdpm
-    step:
+    steps:
       - run:
           name: Update APT listing
           command: apt-get -qq update
