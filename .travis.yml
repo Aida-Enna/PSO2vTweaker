@@ -9,5 +9,5 @@ before_install:
   - docker pull miladiir/vitasdk
   - docker run miladiir/vitasdk /bin/sh -c "vitasdk-update"
 
-install
+install:
   -  docker run miladiir/vitasdk /bin/sh -c "cmake"
