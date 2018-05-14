@@ -29,7 +29,7 @@ jobs:
           command: mkdir -v -p build
       - run:
           name: Build Makefile
-          command: cd buid && cmake ..
+          command: cd build && cmake ..
       - run:
           name: Build VPK
           command: make -C build
