@@ -13,6 +13,7 @@ conflicts, and that would be a very sad thing. - Aeolia Schenberg, 2091 A.D.
 #include <psp2/net/netctl.h>
 #include <psp2/net/http.h>
 #include <psp2/io/fcntl.h>
+#ibclude <psp2/io/stat.h>
 #include <psp2/shellutil.h>
 #include <sys/types.h>
 #include <sys/stat.h>
