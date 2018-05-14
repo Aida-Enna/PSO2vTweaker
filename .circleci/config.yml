@@ -37,5 +37,5 @@ jobs:
           name: List build
           command: ls -halR build
       - store_artifacts:
-          path: $CIRCLE_WORKING_DIRECTORY/build/*.vpk
+          path: build/*.vpk
           destination: bin
