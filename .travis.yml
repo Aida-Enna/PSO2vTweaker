@@ -16,6 +16,8 @@ env:
 before_install:
   - mkdir -p $VITASDK
   - git clone https://github.com/vitasdk/vdpm $VDPMPATH
+  - cd $VITASDK
+  - ./bootstrap-vitasdk.sh
 
 install:
   - export PATH="$VITASDK:$PATH"
