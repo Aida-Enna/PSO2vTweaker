@@ -25,8 +25,8 @@ jobs:
           command: $VDPMPATH/install-all.sh
       - checkout
       - run:
-          name: make build folder
-          command: mkdir -v -p build
+          name: make build and bin folder
+          command: mkdir -v -p build bin
       - run:
           name: Build Makefile
           command: cd build && cmake ..
@@ -34,8 +34,8 @@ jobs:
           name: Build VPK
           command: make -C build
       - run:
-          name: List build
-          command: ls -halR build
+          name: Copy VPKs
+          command: cp build/*.vpk bin
       - store_artifacts:
-          path: build/*.vpk
+          path: bin/
           destination: bin
