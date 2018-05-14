@@ -561,7 +561,7 @@ int main(int argc, char *argv[]) {
 		
 		//Remove all patches before we patch, just in case.
 		//psvDebugScreenPrintf("Clearing patches directory...\n");
-		sceIoRmdir("ux0:/rePatch/PCSG00141/data/vita/patches", 0777);
+		sceIoRmdir("ux0:/rePatch/PCSG00141/data/vita/patches");
 		sceKernelDelayThread(10000);
 		sceIoMkdir("ux0:/rePatch/PCSG00141/data/vita/patches", 0777);
 		
