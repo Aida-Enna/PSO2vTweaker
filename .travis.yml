@@ -8,7 +8,7 @@ services:
 
 before_install:
   - docker pull miladiir/vitasdk
-  - docker run miladiir/vitasdk /bin/sh -c "source /root/.bashrc; vitasdk-update"
+  - docker run miladiir/vitasdk /bin/sh -l -c "vitasdk-update"
 
 install:
-  -  docker run miladiir/vitasdk /bin/sh -c "source /root/.bashrc; cmake"
+  -  docker run miladiir/vitasdk /bin/sh -l -c "cmake"
