@@ -23,10 +23,41 @@ conflicts, and that would be a very sad thing. - Aeolia Schenberg, 2091 A.D.
 #include <assert.h>
 #include <malloc.h>
 #include <string.h>
+#include <stdlib.h>
+#include <stdarg.h>
 
 #include "debugScreen.h"
 
 #define printf psvDebugScreenPrintf
+
+char* concat(int count, ...)
+{
+    va_list ap;
+    int i;
+
+    // Find required length to store merged string
+    int len = 1; // room for NULL
+    va_start(ap, count);
+    for(i=0 ; i<count ; i++)
+        len += strlen(va_arg(ap, char*));
+    va_end(ap);
+
+    // Allocate memory to concat strings
+    char *merged = calloc(sizeof(char),len);
+    int null_pos = 0;
+
+    // Actually concatenate strings
+    va_start(ap, count);
+    for(i=0 ; i<count ; i++)
+    {
+        char *s = va_arg(ap, char*);
+        strcpy(merged+null_pos, s);
+        null_pos += strlen(s);
+    }
+    va_end(ap);
+
+    return merged;
+}
 
 void netInit() {
 	sceSysmoduleLoadModule(SCE_SYSMODULE_NET);
@@ -77,16 +108,111 @@ void download(const char *url, const char *dest) {
 	// create buffer and counter for read bytes.
 	unsigned char data[16*1024];
 	int read = 0;
-
+	
 	// read data until finished
 	while ((read = sceHttpReadData(request, &data, sizeof(data))) > 0) {
 	
 		// writing the count of read bytes from the data buffer to the file
-		/*int write = */sceIoWrite(fh, data, read);
+		/*int write =*/ sceIoWrite(fh, data, read);
 	}
 
 	// close file
 	sceIoClose(fh);
+}
+
+int downloadpatch(const char *src, const char *dst) {
+	int ret;
+	int statusCode;
+	int tmplId = -1, connId = -1, reqId = -1;
+	SceUID fd = -1;
+
+	ret = sceHttpCreateTemplate("PSO2v Tweaker", SCE_HTTP_VERSION_1_1, SCE_TRUE);
+	if (ret < 0)
+		goto ERROR_EXIT;
+
+	tmplId = ret;
+
+	ret = sceHttpCreateConnectionWithURL(tmplId, src, SCE_TRUE);
+	if (ret < 0)
+		goto ERROR_EXIT;
+
+	connId = ret;
+
+	ret = sceHttpCreateRequestWithURL(connId, SCE_HTTP_METHOD_GET, src, 0);
+	if (ret < 0)
+		goto ERROR_EXIT;
+
+	reqId = ret;
+
+	ret = sceHttpSendRequest(reqId, NULL, 0);
+	if (ret < 0)
+		goto ERROR_EXIT;
+
+	ret = sceHttpGetStatusCode(reqId, &statusCode);
+	if (ret < 0)
+		goto ERROR_EXIT;
+
+	if (statusCode == 200) {
+		uint8_t buf[16*1024];
+		uint64_t size = 0;
+		uint32_t value = 0;
+
+		ret = sceHttpGetResponseContentLength(reqId, &size);
+		if (ret < 0)
+			goto ERROR_EXIT;
+
+		ret = sceIoOpen(dst, SCE_O_WRONLY | SCE_O_CREAT | SCE_O_TRUNC, 6);
+		if (ret < 0)
+			goto ERROR_EXIT;
+
+		fd = ret;
+
+		while (1) {
+			int read = sceHttpReadData(reqId, buf, sizeof(buf));
+
+			if (read < 0) {
+				ret = read;
+				break;
+			}
+
+			if (read == 0)
+				break;
+
+			int written = sceIoWrite(fd, buf, read);
+
+			if (written < 0) {
+				ret = written;
+				break;
+			}
+
+			value += read;
+
+			if ((value * 100 / (uint32_t)size) < 77)
+			{
+				printf("\rDownloading patch, please wait.....%d%%    ", (value * 100) / (uint32_t)size);
+			}
+			else
+			{
+				printf("\rPerforming final download steps.....    ");
+			}
+		}
+		printf("\rPatch downloaded successfully!          \n");
+	}
+
+ERROR_EXIT:
+	if (fd >= 0)
+		sceIoClose(fd);
+
+	if (reqId >= 0)
+		sceHttpDeleteRequest(reqId);
+
+	if (connId >= 0)
+		sceHttpDeleteConnection(connId);
+
+	if (tmplId >= 0)
+		sceHttpDeleteTemplate(tmplId);
+
+	return ret;
 }
 
 int WriteFile(char *file, void *buf, int size) {
@@ -248,7 +374,44 @@ int main(int argc, char *argv[]) {
 	{
 		psvDebugScreenPrintf("\e[92m" "\rA new version of the PSO2v Tweaker is available on the website! (");
 		psvDebugScreenPrintf(ver_info);
-		psvDebugScreenPrintf(")" "\e[39;49m" "\n");		
+		psvDebugScreenPrintf(")\nWould you like to download it? Press X to download or R to ignore." "\e[39;49m" "\n");	
+		while (1) {
+		SceCtrlData pad;
+		sceCtrlPeekBufferPositive(0, &pad, 1);
+
+		if (pad.buttons & SCE_CTRL_CROSS)
+		{		
+			char *vpkname;
+				
+			vpkname = concat(3,"ux0:/download/pso2v_tweaker_",ver_info,".vpk");
+				
+			//If there's no download folder, make it.
+			if (stat("ux0:/download", &st) == -1) 
+			{
+				psvDebugScreenPrintf("Creating app directory...\n");
+				sceIoMkdir("ux0:/download", 0777);
+			}
+				
+			download("http://arks-layer.com/vita/pso2v_tweaker.vpk",vpkname);
+			psvDebugScreenPrintf("Download complete! VPK saved as %s.\n",vpkname);
+			psvDebugScreenPrintf("\e[91m" "Please install the VPK listed above to update the PSO2v Tweaker. Press X to exit.");
+			
+			while (1) {
+			SceCtrlData pad;
+			sceCtrlPeekBufferPositive(0, &pad, 1);
+			if (pad.buttons & SCE_CTRL_CROSS)
+			{
+				sceKernelExitProcess(0);
+				return 0;		
+			}
+				sceKernelDelayThread(10000);
+			}
+		}
+		else if (pad.buttons & (SCE_CTRL_RTRIGGER | SCE_CTRL_R1))
+		{
+				break;
+		}
+		}
 	}
 	else
 	{
@@ -324,7 +487,7 @@ int main(int argc, char *argv[]) {
 	ReadFile("ux0:data/PSO2vTweaker/release_old.txt",releaseinfo_old,size);
 	
 	psvDebugScreenPrintf("Done!\n");
-	psvDebugScreenPrintf("The latest patch was created on %s\n",releaseinfo);
+	psvDebugScreenPrintf("The latest patch was created on %s.\n",releaseinfo);
 	
 	if(strcmp(releaseinfo_old,"1/1/2091") == 0) 
 	{
@@ -384,7 +547,7 @@ int main(int argc, char *argv[]) {
 
 		if (pad.buttons & SCE_CTRL_CROSS)
 		{
-		psvDebugScreenPrintf("Downloading patch, please wait.....");
+		//psvDebugScreenPrintf("Downloading patch, please wait.....\n");
 		
 		/*//Download the latest release eg. "4/16/2018"
 		size = getFileSize("ux0:data/PSO2vTweaker/release_url.txt");
@@ -405,7 +568,7 @@ int main(int argc, char *argv[]) {
 		filename = (strrchr(releaseinfo_url, '/'))+1;
 		//psvDebugScreenPrintf(" found filename: %s \n", filename);*/
 		
-		download(releaseinfo_url,str_output);
+		downloadpatch(releaseinfo_url,str_output);
 		
 		sceKernelDelayThread(10000);
 		
