@@ -12,6 +12,12 @@ env:
     - VITASDK=$HOME/local/vita/sdk
     - VDPMPATH=$HOME/local/vdpm
 
+addons:
+  apt:
+    packages:
+    -  libc6-i386
+    -  lib32stdc++6
+    -  lib32gcc1
 
 before_install:
   - git clone https://github.com/vitasdk/vdpm $VDPMPATH
