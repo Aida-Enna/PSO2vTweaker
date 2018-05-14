@@ -37,5 +37,5 @@ jobs:
           name: List build
           command: ls -halR
       - store_artifacts:
-          path: /root/PSO2vTweaker/build/pso2v_tweaker.vpk
+          path: $CIRCLE_WORKING_DIRECTORY/build/*.vpk
           destination: bin
