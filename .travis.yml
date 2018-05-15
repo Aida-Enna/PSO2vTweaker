@@ -19,6 +19,7 @@ addons:
     - lib32stdc++6
     - lib32gcc1
     - patch
+    - p7zip-full
     - zip
 
 before_install:
