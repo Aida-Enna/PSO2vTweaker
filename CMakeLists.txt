@@ -83,7 +83,7 @@ vita_create_vpk(pso2v_tweaker.vpk ${VITA_TITLEID} pso2v_tweaker.self
 )
 
 # Post-Build Step: Add sce_sys
-add_custom_command(TARGET pso2v_tweaker POST_BUILD
+add_custom_command(TARGET pso2v_tweaker.vpk POST_BUILD
   COMMAND 7z a ${CMAKE_CURRENT_BINARY_DIR}/pso2v_tweaker.vpk ${CMAKE_SOURCE_DIR}/sce_sys/*
   COMMENT "Adding sce_sys files: " ${CMAKE_SOURCE_DIR}/sce_sys/*
 )
