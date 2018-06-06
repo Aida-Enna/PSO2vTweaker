@@ -1,0 +1,41 @@
+version: 2
+jobs:
+  build:
+    working_directory: /root/PSO2vTweaker
+    docker:
+      - image: debian:jessie
+        environment:
+          VITASDK: /usr/local/vitasdk
+          VDPMPATH: /usr/local/vdpm
+    steps:
+      - run:
+          name: Update APT listing
+          command: apt-get -qq update
+      - run:
+          name: Install SDK
+          command: apt-get -qq -y install git build-essential sudo curl wget cmake p7zip-full zip
+      - run:
+          name: Get bootstrap Vita SDK
+          command: git clone https://github.com/vitasdk/vdpm $VDPMPATH
+      - run:
+          name: Install bootstrap Vita SDK
+          command: bash -x $VDPMPATH/bootstrap-vitasdk.sh
+      - run: 
+          name: Get Vita SDK
+          command: $VDPMPATH/install-all.sh
+      - checkout
+      - run:
+          name: make build and bin folder
+          command: mkdir -v -p build bin
+      - run:
+          name: Build Makefile
+          command: cd build && cmake ..
+      - run:
+          name: Build VPK
+          command: make -C build
+      - run:
+          name: Copy VPKs
+          command: cp build/*.vpk bin
+      - store_artifacts:
+          path: bin/
+          destination: bin

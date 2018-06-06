@@ -1,0 +1,38 @@
+os: linux
+dist: trusty
+sudo: required
+group: stable
+language: c
+cache:
+  directories:
+   - $HOME/local/vita/
+
+env:
+  global:
+    - VITASDK=$HOME/local/vita/sdk
+    - VDPMPATH=$HOME/local/vdpm
+
+addons:
+  apt:
+    packages:
+    - libc6-i386
+    - lib32stdc++6
+    - lib32gcc1
+    - patch
+    - p7zip-full
+    - zip
+
+before_install:
+  - git clone https://github.com/vitasdk/vdpm $VDPMPATH
+  - bash -x $VDPMPATH/bootstrap-vitasdk.sh || true
+
+install:
+  - export PATH="$VITASDK:$PATH"
+  - $VDPMPATH/install-all.sh
+
+script:
+  - export PATH="$VITASDK:$PATH"
+  - mkdir build && cd build
+  - cmake ..
+  - make
+  - ls -halR

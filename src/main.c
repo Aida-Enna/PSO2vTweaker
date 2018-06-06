@@ -7,12 +7,14 @@ conflicts, and that would be a very sad thing. - Aeolia Schenberg, 2091 A.D.
 
 #include <psp2/sysmodule.h>
 #include <psp2/kernel/processmgr.h>
+#include <psp2/appmgr.h>
 #include <psp2/display.h>
 #include <psp2/ctrl.h>
 #include <psp2/net/net.h>
 #include <psp2/net/netctl.h>
 #include <psp2/net/http.h>
 #include <psp2/io/fcntl.h>
+#include <psp2/io/stat.h>
 #include <psp2/shellutil.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -189,7 +191,7 @@ int downloadpatch(const char *src, const char *dst) {
 
 			if ((value * 100 / (uint32_t)size) < 77)
 			{
-				printf("\rDownloading patch, please wait.....%d%%    ", (value * 100) / (uint32_t)size);
+				printf("\rDownloading patch, please wait.....%d%%    ", (int)((value * 100) / (uint32_t)size));
 			}
 			else
 			{
@@ -262,6 +264,8 @@ int launchAppByUriExit(char *titleid) {
 }
 
 int main(int argc, char *argv[]) {
+	(void)argc;
+	(void)argv;
 	//cmake . && make
 	psvDebugScreenInit();
 	
@@ -304,9 +308,9 @@ int main(int argc, char *argv[]) {
 	 * printf("\e[91m"     "A Red text ");            // 3X = set the foreground color to X
 	 * printf("\e[30;42m"  "Black text on Green BG ");// 4X = set the background color to X 
 	 * printf("\e[39;49m"  "default\n");              // 39/49 = reset FG/BG color 
-	 * printf("\e[97m"     "White+ text ");           /* 9X = set bright foreground color (keep green BG)
-	 * printf("\e[91;106m" "Red+ text on Cyan+ BG "); /* 10X= set bright background color
-	 * printf("\e[m"       "default\n");              /* no param = reset FG/BG
+	 * printf("\e[97m"     "White+ text ");           // 9X = set bright foreground color (keep green BG)
+	 * printf("\e[91;106m" "Red+ text on Cyan+ BG "); // 10X= set bright background color
+	 * printf("\e[m"       "default\n");              // no param = reset FG/BG
 	 */
 	
 	
@@ -559,7 +563,7 @@ int main(int argc, char *argv[]) {
 		
 		//Remove all patches before we patch, just in case.
 		//psvDebugScreenPrintf("Clearing patches directory...\n");
-		sceIoRmdir("ux0:/rePatch/PCSG00141/data/vita/patches", 0777);
+		sceIoRmdir("ux0:/rePatch/PCSG00141/data/vita/patches");
 		sceKernelDelayThread(10000);
 		sceIoMkdir("ux0:/rePatch/PCSG00141/data/vita/patches", 0777);
 		

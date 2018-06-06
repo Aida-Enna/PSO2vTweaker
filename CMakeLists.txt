@@ -31,14 +31,14 @@ set(VITA_VERSION  "00.02")
 
 ## Flags and includes for building
 # Note that we make sure not to overwrite previous flags
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -W")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 # Optional. You can specify more param.sfo flags this way.
 set(VITA_MKSFOEX_FLAGS "${VITA_MKSFOEX_FLAGS} -d PARENTAL_LEVEL=1")
 
 # Add any additional include paths here
 include_directories(
-  ../common # This is for debugScreenPrintf(), you shouldn't need it in your projects
+  common # This is for debugScreenPrintf(), you shouldn't need it in your projects
 )
 
 # Add any additional library paths here
@@ -80,4 +80,10 @@ vita_create_vpk(pso2v_tweaker.vpk ${VITA_TITLEID} pso2v_tweaker.self
   FILE sce_sys/livearea/contents/bg.png sce_sys/livearea/contents/bg.png
   FILE sce_sys/livearea/contents/startup.png sce_sys/livearea/contents/startup.png
   FILE sce_sys/livearea/contents/template.xml sce_sys/livearea/contents/template.xml
+)
+
+# Post-Build Step: Add sce_sys
+add_custom_command(TARGET pso2v_tweaker.vpk POST_BUILD
+  COMMAND cd ${CMAKE_SOURCE_DIR} &&  7z a ${CMAKE_CURRENT_BINARY_DIR}/pso2v_tweaker.vpk sce_sys || zip -ur ${CMAKE_CURRENT_BINARY_DIR}/pso2v_tweaker.vpk sce_sys
+  COMMENT "Adding sce_sys files: " ${CMAKE_SOURCE_DIR}/sce_sys/*
 )
