@@ -275,7 +275,7 @@ int main(int argc, char *argv[]) {
 	char *vpk_internal_ver = malloc(1024);
 	memset(vpk_internal_ver, 0, 1024);
 	vpk_internal_ver[1024] = 0x00;
-	vpk_internal_ver = "1.02";
+	vpk_internal_ver = "1.03";
 	
 	//http://patorjk.com/software/taag/#p=display&f=Basic&t=PSO2v%20Tweaker
 	psvDebugScreenPrintf("\e[94m" "d8888b. .d8888.  .d88b.  " "\e[91m" ".d888b. " "\e[94m" "db    db      " "\e[93m" "d888888b db   d8b   db d88888b  .d8b.  db   dD d88888b d8888b. \n");
@@ -584,6 +584,9 @@ int main(int argc, char *argv[]) {
 		sceIoRead(fdsrc, buf, fdsize);
 		sceIoClose(fdsrc);
 
+		//Zero out the release_old file
+		WriteFile("ux0:/data/PSO2vTweaker/release_old.txt","",sizeof(""));
+		
 		SceUID fddst = sceIoOpen("ux0:data/PSO2vTweaker/release_old.txt", SCE_O_WRONLY | SCE_O_CREAT, 0777);
 		
 		sceIoWrite(fddst, buf, fdsize);
