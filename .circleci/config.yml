@@ -29,7 +29,7 @@ jobs:
           command: mkdir -v -p build bin
       - run:
           name: Build Makefile
-          command: cd build && cmake ..
+          command: cd build && cmake .. -DCMAKE_BUILD_TYPE=MinSizeRel
       - run:
           name: Build VPK
           command: make -C build
