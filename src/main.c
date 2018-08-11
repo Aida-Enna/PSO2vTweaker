@@ -104,8 +104,21 @@ void download(const char *url, const char *dest) {
 	sceHttpSendRequest(request, NULL, 0);
 	//int handle = sceHttpSendRequest(request, NULL, 0);
 
+	int ds = sceIoRemove(dest);
+
+	if (ds < 0)
+	{
+		printf("Could not delete existing file: %08x", ds);
+	}
+
 	// open destination file
 	int fh = sceIoOpen(dest, SCE_O_RDWR | SCE_O_CREAT | SCE_O_TRUNC, 0777);
+
+	if (fh < 0)
+	{
+		printf("Could not create file: %08x", fh);
+		return;
+	}
 
 	// create buffer and counter for read bytes.
 	unsigned char data[16*1024];
