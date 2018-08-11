@@ -242,7 +242,7 @@ int WriteFile(char *file, void *buf, int size) {
 }
 
 int ReadFile(char *file, void *buf, int size) {
-	SceUID fd = sceIoOpen(file,SCE_O_RDONLY, 0777);
+	SceUID fd = sceIoOpen(file, SCE_O_RDONLY, 0777);
 	if (fd < 0)
 		return fd;
 
