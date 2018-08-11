@@ -3,6 +3,7 @@ Humans must learn to apply their intelligence correctly and evolve beyond their 
 People must change. Otherwise, even if humanity expands into space, it will only create new
 conflicts, and that would be a very sad thing. - Aeolia Schenberg, 2091 A.D.
 */
+
 #define VITASDK
 
 #include <psp2/sysmodule.h>
@@ -176,7 +177,7 @@ int downloadpatch(const char *src, const char *dst) {
 		if (ret < 0)
 			goto ERROR_EXIT;
 
-		ret = sceIoOpen(dst, SCE_O_WRONLY | SCE_O_CREAT | SCE_O_TRUNC, 6);
+		ret = sceIoOpen(dst, SCE_O_WRONLY | SCE_O_CREAT | SCE_O_TRUNC, 0777);
 		if (ret < 0)
 			goto ERROR_EXIT;
 
@@ -242,7 +243,7 @@ int WriteFile(char *file, void *buf, int size) {
 }
 
 int ReadFile(char *file, void *buf, int size) {
-	SceUID fd = sceIoOpen(file,SCE_O_RDONLY, 0777);
+	SceUID fd = sceIoOpen(file, SCE_O_RDONLY, 0777);
 	if (fd < 0)
 		return fd;
 
@@ -438,7 +439,7 @@ int main(int argc, char *argv[]) {
 	//Check for old patch info, write a new one if it's not there (first boot)
 	if (!FileExists("ux0:/data/PSO2vTweaker/release_old.txt"))
 	{
-		psvDebugScreenPrintf("Couldn't find old patch info, writing...\n");
+		psvDebugScreenPrintf("\nCouldn't find old patch info, writing...\n");
 		WriteFile("ux0:/data/PSO2vTweaker/release_old.txt","1/1/2091",sizeof("1/1/2091"));
 	}
 
@@ -508,7 +509,7 @@ int main(int argc, char *argv[]) {
 
 	if(strcmp(releaseinfo_old,"1/1/2091") == 0)
 	{
-		psvDebugScreenPrintf("You don't appear to have ever installed the English patch before on this system (using PSO2v Tweaker).\n");
+		//psvDebugScreenPrintf("You don't appear to have ever installed the English patch before on this system (using PSO2v Tweaker).\n");
 		install_needed = true;
 	}
 	else
@@ -626,7 +627,7 @@ int main(int argc, char *argv[]) {
 	free(releaseinfo_url);
 	free(releaseinfo);
 	free(releaseinfo_old);
-	psvDebugScreenPrintf("\e[36m" "Press X to launch the game or press [] to quit.");
+	psvDebugScreenPrintf("\e[36m" "Press X to launch the game or press [] to quit. (Or press Triangle for debug code)");
 	while (1) {
 		SceCtrlData pad;
 		sceCtrlPeekBufferPositive(0, &pad, 1);
@@ -638,6 +639,13 @@ int main(int argc, char *argv[]) {
 		}
 
 		if (pad.buttons & SCE_CTRL_CROSS)
+		{
+			//Launch the game
+			launchAppByUriExit("PCSG00141");
+			break;
+		}
+		
+		if (pad.buttons & SCE_CTRL_TRIANGLE)
 		{
 			//Launch the game
 			launchAppByUriExit("PCSG00141");
