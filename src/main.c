@@ -627,7 +627,7 @@ int main(int argc, char *argv[]) {
 	free(releaseinfo_url);
 	free(releaseinfo);
 	free(releaseinfo_old);
-	psvDebugScreenPrintf("\e[36m" "Press X to launch the game or press [] to quit. (Or press Triangle for debug code)");
+	psvDebugScreenPrintf("\e[36m" "Press X to launch the game or press [] to quit.");
 	while (1) {
 		SceCtrlData pad;
 		sceCtrlPeekBufferPositive(0, &pad, 1);
@@ -639,13 +639,6 @@ int main(int argc, char *argv[]) {
 		}
 
 		if (pad.buttons & SCE_CTRL_CROSS)
-		{
-			//Launch the game
-			launchAppByUriExit("PCSG00141");
-			break;
-		}
-		
-		if (pad.buttons & SCE_CTRL_TRIANGLE)
 		{
 			//Launch the game
 			launchAppByUriExit("PCSG00141");
